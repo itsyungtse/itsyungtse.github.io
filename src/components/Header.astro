@@ -4,19 +4,6 @@ import HeaderLink from './HeaderLink.astro';
 const location = Astro.url.pathname;
 ---
 
-<header class="h-20 flex items-center">
-	<nav
-		class="mx-auto w-full max-w-3xl px-4"
-	>
-		<div>
-			{
-				location !== '/' && (
-					<HeaderLink href="/" class="flex items-center px-4 py-2 underline">
-						{' '}
-						Go Back{' '}
-					</HeaderLink>
-				)
-			}
-		</div>
-	</nav>
+<header class="flex h-20 items-center">
+	<nav class="mx-auto w-full max-w-3xl px-4"></nav>
 </header>

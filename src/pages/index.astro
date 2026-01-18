@@ -8,48 +8,61 @@ import FormattedDate from '../components/FormattedDate.astro';
 const posts = (await getCollection('blog')).sort(
 	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
+
+const socials = [
+	{
+		name: 'GitHub',
+		url: 'https://github.com/itsyungtse',
+		screenReaderText: "Go to YungTse's GitHub repo",
+	},
+	{
+		name: 'LinkedIn',
+		url: 'https://www.linkedin.com/in/yungtse-t-454394226/',
+		screenReaderText: "Go to YungTse's LinkedIn",
+	},
+];
 ---
 
 <Layout title={SITE_TITLE} description={SITE_DESCRIPTION}>
 	<Header />
-		<main class="grow md:container md:mx-auto">
-			<section class="flex flex-col gap-2">
-				<div class="flex items-end gap-2">
-					<h1 class="text-xl font-bold">YungTse Teng</h1>
-				</div>
+	<main class="grow md:container md:mx-auto">
+		<section class="flex flex-col gap-2">
+			<div class="flex items-end gap-2">
+				<h1 class="text-xl font-bold">YungTse Teng</h1>
+			</div>
 
-				<p>
-					An Software Engineer building web applications, learning new
-					technologies, and sharing knowledge.
-				</p>
-				<div class="flex gap-2">
-					<a href="https://github.com/withastro/astro" target="_blank">
-						<span class="text-sm underline"> GitHub </span>
-						<span class="sr-only">Go to YungTse's GitHub repo</span>
-					</a>
-					<a href="https://github.com/withastro/astro" target="_blank">
-						<span class="text-sm underline"> LinkedIn </span>
-						<span class="sr-only">Go to YungTse's LinkedIn</span>
-					</a>
-				</div>
-			</section>
-			<section class="container my-8">
-				<ul class="m-0 flex list-none flex-col gap-8 p-0 md:gap-8">
-					{
-						posts.map((post, idx) => (
-							<li class="group w-full">
-								<a href={`/blog/${post.id}/`} class="flex items-center gap-4">
-									<h4 class="m-0 text-xl leading-tight transition-colors duration-200 group-hover:underline">
-										{post.data.title}
-									</h4>
-									<p class="m-0 text-xs text-(--gray) transition-colors duration-200 group-hover:text-(--accent)">
-										<FormattedDate date={post.data.pubDate} />
-									</p>
-								</a>
-							</li>
-						))
-					}
-				</ul>
-			</section>
-		</main>
+			<p>
+				An Software Engineer building web applications, learning new
+				technologies, and sharing knowledge.
+			</p>
+			<div class="flex gap-2">
+				{
+					socials.map((social) => (
+						<a href={social.url} target="_blank">
+							<span class="text-sm underline"> {social.name} </span>
+							<span class="sr-only">{social.screenReaderText}</span>
+						</a>
+					))
+				}
+			</div>
+		</section>
+		<section class="container my-8">
+			<ul class="m-0 flex list-none flex-col gap-8 p-0 md:gap-8">
+				{
+					posts.map((post) => (
+						<li class="group w-full">
+							<a href={`/blog/${post.id}/`} class="flex items-center gap-4">
+								<h4 class="m-0 text-lg leading-tight transition-colors duration-200 group-hover:underline">
+									{post.data.title}
+								</h4>
+								<p class="m-0 text-xs text-(--gray) transition-colors duration-200 group-hover:text-(--accent)">
+									<FormattedDate date={post.data.pubDate} />
+								</p>
+							</a>
+						</li>
+					))
+				}
+			</ul>
+		</section>
+	</main>
 </Layout>
