@@ -1,8 +1,14 @@
 ---
-import BaseHead from '../components/BaseHead.astro';
-import Footer from '../components/Footer.astro';
-import Header from '../components/Header.astro';
-import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+import { getCollection } from "astro:content";
+import BaseHead from "../components/BaseHead.astro";
+import Footer from "../components/Footer.astro";
+import Header from "../components/Header.astro";
+import { SITE_DESCRIPTION, SITE_TITLE } from "../consts";
+import FormattedDate from "../components/FormattedDate.astro";
+
+const posts = (await getCollection("blog")).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
 ---
 
 <!doctype html>
@@ -13,8 +19,55 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 	<body class="flex flex-col min-h-screen">
 		<Header />
 		<main class="grow md:container md:mx-auto">
-			<h1>🧑‍🚀 Hello, world!</h1>
+			<section class="flex flex-col gap-2">
+				<div class="flex items-end gap-2">
+					<h1 class="text-xl font-bold">YungTse Teng</h1>
+				</div>
+
+				<p>
+					An Software Engineer building web applications, learning new
+					technologies, and sharing knowledge.
+				</p>
+				<div class='flex gap-2'>
+					<a
+						href="https://github.com/withastro/astro"
+						target="_blank"
+					>
+						<span class="underline text-sm"> GitHub </span>
+						<span class="sr-only">Go to YungTse's GitHub repo</span>
+					</a>
+					<a
+						href="https://github.com/withastro/astro"
+						target="_blank"
+					>
+						<span class="underline text-sm"> LinkedIn </span>
+						<span class="sr-only">Go to YungTse's LinkedIn</span>
+					</a>
+				</div>
+			</section>
+			<section class="container my-8">
+				<ul class="flex flex-col gap-8 md:gap-8 list-none m-0 p-0">
+					{
+						posts.map((post, idx) => (
+							<li class="w-full group">
+								<a
+									href={`/blog/${post.id}/`}
+									class="flex items-center gap-4"
+								>
+									<h4 class="m-0 text-xl leading-tight transition-colors duration-200 group-hover:underline">
+										{post.data.title}
+									</h4>
+									<p class="m-0 text-(--gray) group-hover:text-(--accent) transition-colors duration-200 text-xs">
+										<FormattedDate
+											date={post.data.pubDate}
+										/>
+									</p>
+								</a>
+							</li>
+						))
+					}
+				</ul>
+			</section>
 		</main>
-		<Footer />
 	</body>
 </html>
