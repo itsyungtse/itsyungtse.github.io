@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 @plugin "@tailwindcss/typography";
 
 @theme inline {
@@ -9,7 +9,7 @@
 	--color-accent: var(--accent);
 	--color-accent-foreground: var(--accent-foreground);
 	--color-border: var(--border);
-	
+
 	/* Typography prose colors */
 	--color-prose-body: var(--foreground);
 	--color-prose-headings: var(--foreground);
@@ -29,7 +29,7 @@
 	--accent: oklch(0.205 0 0);
 	--accent-foreground: oklch(0.985 0 0);
 	--border: oklch(0.922 0 0);
-	
+
 	/* Legacy colors */
 	--accent-legacy: #2337ff;
 	--accent-dark: #000d8a;
@@ -39,8 +39,8 @@
 	--gray-dark: 34, 41, 57;
 	--gray-gradient: rgba(var(--gray-light), 50%), #fff;
 	--box-shadow:
-		0 2px 6px rgba(var(--gray), 25%), 0 8px 24px rgba(var(--gray), 33%), 0 16px
-		32px rgba(var(--gray), 33%);
+		0 2px 6px rgba(var(--gray), 25%), 0 8px 24px rgba(var(--gray), 33%),
+		0 16px 32px rgba(var(--gray), 33%);
 }
 
 .dark {
@@ -73,7 +73,7 @@
 }
 
 main {
-	@apply max-w-3xl mx-auto;
+	@apply mx-auto max-w-3xl;
 }
 
 .sr-only {
@@ -99,7 +99,9 @@ kbd {
 	border: 1px solid var(--border);
 	border-radius: 4px;
 	padding: 2px 6px;
-	font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+	font-family:
+		ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono',
+		monospace;
 	font-size: 0.875em;
 	color: var(--foreground);
 }
