@@ -1,6 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
-import BaseHead from '../components/BaseHead.astro';
+import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 import FormattedDate from '../components/FormattedDate.astro';
@@ -10,13 +10,8 @@ const posts = (await getCollection('blog')).sort(
 );
 ---
 
-<!doctype html>
-<html lang="en">
-	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-	</head>
-	<body class="flex min-h-screen flex-col">
-		<Header />
+<Layout title={SITE_TITLE} description={SITE_DESCRIPTION}>
+	<Header />
 		<main class="grow md:container md:mx-auto">
 			<section class="flex flex-col gap-2">
 				<div class="flex items-end gap-2">
@@ -57,5 +52,4 @@ const posts = (await getCollection('blog')).sort(
 				</ul>
 			</section>
 		</main>
-	</body>
-</html>
+</Layout>

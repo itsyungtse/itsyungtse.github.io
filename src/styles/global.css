@@ -1,8 +1,37 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+@theme inline {
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+	--color-muted: var(--muted);
+	--color-muted-foreground: var(--muted-foreground);
+	--color-accent: var(--accent);
+	--color-accent-foreground: var(--accent-foreground);
+	--color-border: var(--border);
+	
+	/* Typography prose colors */
+	--color-prose-body: var(--foreground);
+	--color-prose-headings: var(--foreground);
+	--color-prose-links: var(--accent);
+	--color-prose-bold: var(--foreground);
+	--color-prose-code: var(--foreground);
+	--color-prose-quotes: var(--muted-foreground);
+	--color-prose-hr: var(--border);
+}
+
 :root {
-	--accent: #2337ff;
+	/* Theme colors */
+	--background: oklch(1 0 0);
+	--foreground: oklch(0.145 0 0);
+	--muted: oklch(0.97 0 0);
+	--muted-foreground: oklch(0.556 0 0);
+	--accent: oklch(0.205 0 0);
+	--accent-foreground: oklch(0.985 0 0);
+	--border: oklch(0.922 0 0);
+	
+	/* Legacy colors */
+	--accent-legacy: #2337ff;
 	--accent-dark: #000d8a;
 	--black: 15, 18, 25;
 	--gray: 96, 115, 159;
@@ -12,6 +41,35 @@
 	--box-shadow:
 		0 2px 6px rgba(var(--gray), 25%), 0 8px 24px rgba(var(--gray), 33%), 0 16px
 		32px rgba(var(--gray), 33%);
+}
+
+.dark {
+	--background: oklch(0.145 0 0);
+	--foreground: oklch(0.985 0 0);
+	--muted: oklch(0.269 0 0);
+	--muted-foreground: oklch(0.708 0 0);
+	--accent: oklch(0.922 0 0);
+	--accent-foreground: oklch(0.205 0 0);
+	--border: oklch(1 0 0 / 10%);
+}
+
+/* Prose overrides to use theme colors */
+.prose {
+	--tw-prose-body: var(--foreground);
+	--tw-prose-headings: var(--foreground);
+	--tw-prose-links: var(--accent);
+	--tw-prose-bold: var(--foreground);
+	--tw-prose-counters: var(--muted-foreground);
+	--tw-prose-bullets: var(--muted-foreground);
+	--tw-prose-hr: var(--border);
+	--tw-prose-quotes: var(--muted-foreground);
+	--tw-prose-quote-borders: var(--border);
+	--tw-prose-captions: var(--muted-foreground);
+	--tw-prose-code: var(--foreground);
+	--tw-prose-pre-code: var(--foreground);
+	--tw-prose-pre-bg: var(--muted);
+	--tw-prose-th-borders: var(--border);
+	--tw-prose-td-borders: var(--border);
 }
 
 main {

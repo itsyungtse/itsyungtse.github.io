@@ -1,13 +1,12 @@
 ---
 import HeaderLink from './HeaderLink.astro';
-import ThemeIcon from './ThemeIcon.astro';
 
 const location = Astro.url.pathname;
 ---
 
-<header class="sticky top-0 bg-white dark:bg-(--bg)">
+<header class="h-20 flex items-center">
 	<nav
-		class="mx-auto flex h-20 w-full max-w-3xl items-center justify-between px-4"
+		class="mx-auto w-full max-w-3xl px-4"
 	>
 		<div>
 			{
@@ -19,6 +18,5 @@ const location = Astro.url.pathname;
 				)
 			}
 		</div>
-		<ThemeIcon />
 	</nav>
 </header>
