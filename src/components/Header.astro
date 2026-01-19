@@ -1,9 +1,18 @@
 ---
-import HeaderLink from './HeaderLink.astro';
+import ThemeIcon from './ThemeIcon.astro';
 
-const location = Astro.url.pathname;
+const pathname = Astro.url.pathname;
 ---
 
-<header class="flex h-20 items-center">
-	<nav class="mx-auto w-full max-w-3xl px-4"></nav>
+<header class="flex h-20 shrink-0 items-center">
+	<nav class="mx-auto w-full max-w-3xl px-4">
+		{
+			pathname !== '/' && (
+				<a href="/" class="text-lg hover:underline">
+					Back to Home
+				</a>
+			)
+		}
+	</nav>
+	<ThemeIcon />
 </header>

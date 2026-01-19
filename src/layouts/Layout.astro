@@ -5,7 +5,7 @@ import ThemeIcon from '../components/ThemeIcon.astro';
 type Props = {
 	title: string;
 	description: string;
-}
+};
 
 const { title, description } = Astro.props;
 ---
@@ -15,8 +15,7 @@ const { title, description } = Astro.props;
 	<head>
 		<BaseHead title={title} description={description} />
 	</head>
-	<body class="relative flex min-h-screen flex-col bg-background text-foreground">
+	<body class="bg-background text-foreground relative flex flex-col px-6 pt-6">
 		<slot />
-        <ThemeIcon class:list={'absolute top-0 left-0'} />
 	</body>
 </html>

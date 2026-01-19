@@ -8,7 +8,6 @@ export default [
 	...eslintPluginAstro.configs.recommended,
 	{
 		rules: {
-			// Equivalent to Biome's recommended rules
 			'no-unused-vars': 'error',
 			'no-undef': 'error',
 			'prefer-const': 'error',
@@ -16,7 +15,6 @@ export default [
 		},
 	},
 	{
-		// Overrides for Astro files (matching previous Biome config)
 		files: ['**/*.astro'],
 		rules: {
 			'prefer-const': 'off',
