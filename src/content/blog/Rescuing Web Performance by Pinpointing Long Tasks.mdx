@@ -91,7 +91,7 @@ function handlerSyncJob(data) {
 }
 ```
 
-Now only the `end-event` creates a Promise, avoiding the microtask overflow. After adjustments, the long-tasks in flame graph reduces a lot:
+Now only the `end-event` creates a Promise, avoiding the microtask overflow. After adjustments, the long tasks in flame graph reduces a lot:
 
 <Image src={AfterPerformance} alt="Components" />
 
