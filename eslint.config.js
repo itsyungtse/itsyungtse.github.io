@@ -16,6 +16,13 @@ export default [
 	},
 	{
 		files: ['**/*.astro'],
+		languageOptions: {
+			parser: require('astro-eslint-parser'),
+			parserOptions: {
+				parser: '@typescript-eslint/parser',
+				extraFileExtensions: ['.astro'],
+			},
+		},
 		rules: {
 			'prefer-const': 'off',
 			'@typescript-eslint/consistent-type-imports': 'off',
