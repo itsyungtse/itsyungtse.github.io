@@ -52,12 +52,20 @@ const socials = [
 				{
 					posts.map((post) => (
 						<li class="group w-full">
-							<a href={`/blog/${post.id}/`} class="flex items-center gap-4">
-								<h4 class="m-0 text-lg leading-tight transition-colors duration-200 group-hover:underline">
-									{post.data.title}
-								</h4>
-								<p class="m-0 text-xs text-(--gray) transition-colors duration-200 group-hover:text-(--accent)">
-									<FormattedDate date={post.data.pubDate} />
+							<a
+								href={`/blog/${post.id}/`}
+								class="flex flex-col items-center gap-2"
+							>
+								<div class="flex w-full items-center justify-between">
+									<h4 class="m-0 text-lg leading-tight underline transition-colors duration-200">
+										{post.data.title}
+									</h4>
+									<p class="m-0 text-xs text-(--gray) transition-colors duration-200 group-hover:text-(--accent)">
+										<FormattedDate date={post.data.pubDate} />
+									</p>
+								</div>
+								<p class="w-full text-xs text-(--gray) transition-colors duration-200 group-hover:text-(--accent)">
+									{post.data.description}
 								</p>
 							</a>
 						</li>
