@@ -13,7 +13,7 @@ import AfterComponents from '@/assets/after-components.png';
 import beforeRendering from '@/assets/before-fix.webm';
 import afterRendering from '@/assets/after-fix.webm';
 
-**TLDR;** A walkthrough of how to identify and solve web performance issues using Chrome DevTools and [react-scan](https://github.com/aidenybai/react-scan).
+**TL;DR** A walkthrough of how to identify and solve web performance issues using Chrome DevTools and [react-scan](https://github.com/aidenybai/react-scan).
 
 While working on a React-based streaming chat UI, I ran into a serious performance issue, as shown in the video below:
 
@@ -21,7 +21,7 @@ While working on a React-based streaming chat UI, I ran into a serious performan
 
 As you can see from the FPS number at the top-right of the screen, it dropped to 3 FPS when performing heavy rendering tasks like syntax highlighting or custom markdown, and the browser would freeze in the worst cases—clearly not something you'd want to ship.
 
-## Chrome devtools
+## Chrome DevTools
 
 So I opened Chrome DevTools, switched to the Performance tab, and recorded a flame graph to pinpoint where the issue was coming from.
 
