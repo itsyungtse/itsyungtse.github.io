@@ -4,21 +4,22 @@ description: 'A walkthrough of how to identify and solve web performance issues 
 pubDate: 'Dec 18 2025'
 ---
 
-import { YouTube } from 'astro-embed';
 import { Image } from 'astro:assets';
 import BeforePerformance from '@/assets/before-performance.png';
 import BeforeLongTask from '@/assets/before-longtask.png';
 import BeforeComponents from '@/assets/before-components.png';
 import AfterPerformance from '@/assets/after-performance.png';
 import AfterComponents from '@/assets/after-components.png';
+import beforeRendering from '@/assets/before-fix.webm';
+import afterRendering from '@/assets/after-fix.webm';
 
 **TLDR;** A walkthrough of how to identify and solve web performance issues using Chrome DevTools and [react-scan](https://github.com/aidenybai/react-scan).
 
-I was working on building an AI chat web application at my current job. When I took over this codebase and started building new features, I soon found a serious performance issue, as shown in the video below:
+While working on a React-based streaming chat UI, I ran into a serious performance issue, as shown in the video below:
 
-<YouTube id="evmOl4txVDw" />
+<video src={beforeRendering} controls preload="metadata" playsinline />
 
-As you can see from the FPS number at the top-right of the screen, it dropped to 3 FPS when performing heavy rendering tasks like syntax highlighting or custom markdown, and the browser would freeze in the worst cases. This issue had a bad effect on daily development, not to mention the production environment.
+As you can see from the FPS number at the top-right of the screen, it dropped to 3 FPS when performing heavy rendering tasks like syntax highlighting or custom markdown, and the browser would freeze in the worst cases—clearly not something you'd want to ship.
 
 ## Chrome devtools
 
@@ -30,21 +31,19 @@ From the flame graph, we can see there were a lot of long tasks causing the brow
 
 <Image src={BeforeLongTask} alt="Long task" />
 
-It seems like the browser spent a lot of time processing the logic we defined in zustand and handlers. This is a good sign, now we know where we can solve the problem.
+It looked like the browser was spending most of its time inside state updates and event handlers. That's a good sign—at least we now know where to start digging.
 
 ## react-scan
 
-[react-scan](https://github.com/aidenybai/react-scan) is a useful tool that automatically detects performance issues in your React app. I learned about it from X (formerly Twitter) posts, and it proved really helpful.
-
-After installing react-scan and trying to reproduce the issue again, I found there was a performance issue when rendering those syntax-highlighted code blocks:
+[react-scan](https://github.com/aidenybai/react-scan) is a handy tool that automatically highlights re-rendering issues in a React app. After dropping it in and reproducing the lag, the syntax-highlighted code blocks lit up as an obvious offender:
 
 <Image src={BeforeComponents} alt="Components" />
 
-In the codebase, we used [react-syntax-highlight](https://github.com/react-syntax-highlighter/react-syntax-highlighter) for syntax highlighting. It was easy to set up and worked great in the React app, but it had a performance issue on re-rendering. I found several GitHub issues discussing this problem. So I decided to migrate it to [rehype-highlight](https://github.com/rehypejs/rehype-highlight), which is compatible with react-markdown and faster for re-rendering use cases.
+The app was using [react-syntax-highlighter](https://github.com/react-syntax-highlighter/react-syntax-highlighter)—easy to set up, but with known re-rendering overhead (there are a number of open GitHub issues on this). Swapping it for [rehype-highlight](https://github.com/rehypejs/rehype-highlight) turned out to be a better fit: it plugs straight into react-markdown and is much cheaper to re-render on streaming updates.
 
 ## Root cause
 
-Based on the info I gathered, I looked into the codebase to find the problem. It turned out to be a skill issue: the browser's main thread got stuck due to too many microtasks. Here is the sample code:
+Digging deeper into the code paths flagged by the flame graph, the actual culprit turned out to be surprisingly simple: the main thread was drowning in microtasks. Here's a minimal reproduction of the pattern:
 
 ```javascript
 // Called on every stream chunk
@@ -91,20 +90,24 @@ function handlerSyncJob(data) {
 }
 ```
 
-Now only the `end-event` creates a Promise, avoiding the microtask overflow. After adjustments, the long tasks in flame graph reduces a lot:
+Now only the `end-event` path creates a Promise, which avoids the microtask overflow. After the fix, the long tasks in the flame graph drop significantly:
 
 <Image src={AfterPerformance} alt="Components" />
 
-I also migrated the markdown to rehype-highlight and used `useMemo` to handle react-markdown props, which improved re-rendering performance according to react-scan:
+Combined with the move to rehype-highlight and a `useMemo` around the react-markdown props, re-rendering cost—measured via react-scan—went down noticeably too:
 
 <Image src={AfterComponents} alt="Components" />
 
 ## Takeaway
 
-Looking back at this problem, what strikes me most is how a seemingly complex issue came down to something simple—just misusing async/await.
+What stands out to me looking back is how a problem that felt complex—3 FPS, frozen tabs, a flame graph full of long tasks—boiled down to something this small: an `async` keyword that didn't need to be there.
 
-Also in open-source community, people out there are working on some great tools that can be used and boost your website, super respect to their contributions.
+A few things I'll keep in mind next time:
 
-If you've run into something like this before, I'd be curious to hear how you approached it. This is the final result:
+- Flame graphs tell you _where_ time is spent; react-scan tells you _what_ is re-rendering. They're most useful together.
+- `async` isn't free. A function that returns a Promise on every call, multiplied by a streaming event loop, is its own kind of N+1 problem.
+- Big thanks to the authors of react-scan, rehype-highlight, and the broader ecosystem—huge respect to everyone shipping these tools.
 
-<YouTube id="oou1p5WIkmY" />
+If you've hit something similar, I'd love to hear how you diagnosed it. Here's the final result:
+
+<video src={afterRendering} controls preload="metadata" playsinline />
