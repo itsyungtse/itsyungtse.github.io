@@ -92,7 +92,7 @@ function handlerSyncJob(data) {
 
 Now only the `end-event` path creates a Promise, which avoids the microtask overflow. After the fix, the long tasks in the flame graph drop significantly:
 
-<Image src={AfterPerformance} alt="Components" />
+<Image src={AfterPerformance} alt="Flame graph after fix showing reduced long tasks" />
 
 Combined with the move to rehype-highlight and a `useMemo` around the react-markdown props, re-rendering cost—measured via react-scan—went down noticeably too:
 
