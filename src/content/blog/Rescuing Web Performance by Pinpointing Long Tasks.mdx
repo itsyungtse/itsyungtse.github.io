@@ -31,11 +31,11 @@ From the flame graph, we can see there were a lot of long tasks causing the brow
 
 <Image src={BeforeLongTask} alt="Long task" />
 
-It looked like the browser was spending most of its time inside state updates and event handlers. That's a good sign—at least we now know where to start digging.
+It looked like the browser was spending most of its time inside state updates and event handlers. At least now we knew where to start digging.
 
 ## react-scan
 
-[react-scan](https://github.com/aidenybai/react-scan) is a handy tool that automatically highlights re-rendering issues in a React app. After dropping it in and reproducing the lag, the syntax-highlighted code blocks lit up as an obvious offender:
+[react-scan](https://github.com/aidenybai/react-scan) automatically highlights re-rendering issues in a React app. After dropping it in and reproducing the lag, the syntax-highlighted code blocks lit up as an obvious offender:
 
 <Image src={BeforeComponents} alt="Components" />
 
@@ -43,7 +43,7 @@ The app was using [react-syntax-highlighter](https://github.com/react-syntax-hig
 
 ## Root cause
 
-Digging deeper into the code paths flagged by the flame graph, the actual culprit turned out to be surprisingly simple: the main thread was drowning in microtasks. Here's a minimal reproduction of the pattern:
+The actual culprit turned out to be surprisingly simple: the main thread was drowning in microtasks. Here's a minimal reproduction of the pattern:
 
 ```javascript
 // Called on every stream chunk
@@ -63,14 +63,14 @@ async function asyncJob(type, data) {
 }
 ```
 
-The problem is that `streamEventHandler` is called **on every stream chunk**, which could be hundreds or thousands of times. Even though `asyncJob()` only actually awaits something on the `end-event`, the fact that it's an `async` function means it **always returns a Promise**. This creates a cascade of microtasks:
+`streamEventHandler` is called **on every stream chunk**, which could be hundreds or thousands of times. Even though `asyncJob()` only actually awaits something on the `end-event`, the fact that it's an `async` function means it **always returns a Promise**. This creates a cascade of microtasks:
 
 1. Create a Promise for every single stream chunk
 2. Queue all these Promises as microtasks in the event loop
 3. The browser processes all these microtasks before moving to the next macrotask (like rendering)
 4. With hundreds of microtasks to process, the main thread is blocked long enough that rendering can't happen—creating a long task
 
-The solution is to **only use async when you actually need to await**:
+The fix is to only use async when you actually need to await:
 
 ```javascript
 // Fixed version
@@ -100,14 +100,13 @@ Combined with the move to rehype-highlight and a `useMemo` around the react-mark
 
 ## Takeaway
 
-What stands out to me looking back is how a problem that felt complex—3 FPS, frozen tabs, a flame graph full of long tasks—boiled down to something this small: an `async` keyword that didn't need to be there.
+A problem that felt complex—3 FPS, frozen tabs, a flame graph full of long tasks—came down to an `async` keyword that didn't need to be there.
 
 A few things I'll keep in mind next time:
 
 - Flame graphs tell you _where_ time is spent; react-scan tells you _what_ is re-rendering. They're most useful together.
 - `async` isn't free. A function that returns a Promise on every call, multiplied by a streaming event loop, is its own kind of N+1 problem.
-- Big thanks to the authors of react-scan, rehype-highlight, and the broader ecosystem—huge respect to everyone shipping these tools.
 
-If you've hit something similar, I'd love to hear how you diagnosed it. Here's the final result:
+If you've hit something similar, I'd be curious how you diagnosed it. Here's the final result:
 
 <video src={afterRendering} controls preload="metadata" playsinline />
