@@ -5,9 +5,9 @@ import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
 import Footer from '@/components/Footer.astro';
 
-type Props = CollectionEntry<'blog'>['data'];
+type Props = CollectionEntry<'blog'>['data'] & { id: string };
 
-const { title, description, pubDate, updatedDate } = Astro.props;
+const { title, description, pubDate, updatedDate, id } = Astro.props;
 ---
 
 <Layout title={title} description={description}>
@@ -15,7 +15,7 @@ const { title, description, pubDate, updatedDate } = Astro.props;
 	<main class="md:container md:mx-auto">
 		<article class="prose w-full max-w-none">
 			<div class="text-center">
-				<h1 class="text-3xl">{title}</h1>
+				<h1 class="text-3xl" transition:name={`post-title-${id}`}>{title}</h1>
 				<div class="date">
 					<FormattedDate date={pubDate} />
 					{
