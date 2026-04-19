@@ -55,10 +55,14 @@
 </style>
 
 <script is:inline>
-	const theme = localStorage.getItem('theme')
-		?? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-	document.documentElement.classList.toggle('dark', theme === 'dark');
-	localStorage.setItem('theme', theme);
+	function applyTheme() {
+		const theme = localStorage.getItem('theme')
+			?? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+		document.documentElement.classList.toggle('dark', theme === 'dark');
+		localStorage.setItem('theme', theme);
+	}
+	applyTheme();
+	document.addEventListener('astro:after-swap', applyTheme);
 </script>
 
 <script>
