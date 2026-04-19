@@ -72,8 +72,24 @@
 	--tw-prose-td-borders: var(--border);
 }
 
+body {
+	overflow-x: hidden;
+}
+
 main {
-	@apply mx-auto max-w-3xl;
+	@apply mx-auto max-w-3xl px-4;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.prose pre {
+	max-width: 100%;
+	overflow-x: auto;
+}
+
+.prose video,
+.prose img {
+	max-width: 100%;
 }
 
 .sr-only {
