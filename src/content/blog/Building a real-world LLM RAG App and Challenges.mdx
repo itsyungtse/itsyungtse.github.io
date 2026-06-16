@@ -1,0 +1,50 @@
+---
+title: 'Building a real-world LLM RAG App and Challenges'
+description: 'What else you need to consider when building a production-grade LLM RAG app'
+pubDate: 'Jun 15 2026'
+---
+
+Back in 2023, I built a PDF RAG web application using Langchain.js and PDF.js as a side project.
+The architecture was quite simple: just wire up chunking and embedding, and the LLM would do its magic.
+
+Now, in 2026, I'd like to share some insights and challenges from building a real-world LLM knowledge management application.
+
+## The Design of a Solid RAG App
+
+There are four modules that I believe are required for a solid RAG app:
+
+- **Prompt Engineering**: You don't want the LLM to lie to you about the source of truth, right?
+  So a good prompt matters, especially for low-tier LLMs. If you can make an LLM respond as expected and stay stable,
+  you're already halfway to success. One caveat: lock your model version — a silent provider upgrade can shift behavior and break a prompt you worked hard to stabilize.
+
+- **Make Good Use of Chunking Strategies**: In the real world, there are so many file types: .pdf, .docx, .pptx, .csv, .xlsx,
+  not to mention that many enterprises still use .doc and .xls, and some files have images embedded in them.
+  Since the content and structure differ from one to another, there's no single chunking strategy that fits them all.
+
+- **Context Engineering**: Attention is all an LLM needs.
+  Low-quality chunks ruin the response, while too many qualified chunks blow up the context window once you're dealing with large knowledge bases,
+  yet completeness drops if you cap the chunk count. Sure, you could set up a sub-agent to summarize the content from those chunks,
+  but the sub-agent's context isn't shared with the main agent, and the context window limit still applies. So managing context is important.
+
+- **Safety**: Malicious content can be injected into any part of the process, whether the filename, the chunk content, or the user prompt. Take good care of that.
+
+## Challenges
+
+After building the RAG App, there are still some realities you have to face:
+
+- **Generative AI is expensive**: With LLM RAG, every step — from embedding to retrieval — costs money. Take embedding:
+  not every company can afford to run local AI servers, so many rely on a third-party service like Azure Document Intelligence.
+  The bills go crazy once a company has, say, 100GB of files to embed. There's no absolute best option, it depends.
+
+- **Ability to search across large knowledge bases**: It's hard to get the right answer in one shot at the scale of 1,000 knowledge bases with 50 files each. I think
+  that's why Google NotebookLM doesn't let you chat across your entire knowledge base at once. There are still workarounds to improve the user experience, though —
+  human-in-the-loop (HITL), e.g. asking the user a question to narrow the search scope, or a multi-round knowledge search.
+
+- **Access Control**: Most companies have classified documents — especially large enterprises with complex organizational structures — so versatile access control is important.
+
+- **Stable responses across different LLMs**: You'll often expose multiple models, from a lightweight one like Gemini 3 Flash Lite to a heavy-duty model like Claude Opus 4.7.
+  It's crucial that they all respond in a consistent format. This is where an LLM can help: you can have it auto-fix the prompt for you.
+
+## Takeaway
+
+In 2026, LLM RAG can feel out of fashion — everyone's talking about agents, harness engineering, and loop engineering. But to me, RAG is foundational infrastructure for business-facing LLM applications: companies will keep using it to boost productivity, whatever the trend.
