@@ -6,7 +6,7 @@
 	id="themeToggle"
 	transition:persist
 	aria-label="Toggle theme"
-	class="fixed top-10 right-10 w-fit rounded-md p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+	class="top-10 right-10 hidden w-fit rounded-md p-2 transition-colors hover:bg-gray-100 md:fixed lg:block dark:hover:bg-gray-800"
 >
 	<svg
 		width="24"
@@ -56,8 +56,9 @@
 
 <script is:inline>
 	function applyTheme() {
-		const theme = localStorage.getItem('theme')
-			?? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+		const theme =
+			localStorage.getItem('theme') ??
+			(matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 		document.documentElement.classList.toggle('dark', theme === 'dark');
 		localStorage.setItem('theme', theme);
 	}
@@ -72,7 +73,10 @@
 		btn.dataset.listenerAttached = 'true';
 		btn.addEventListener('click', () => {
 			document.documentElement.classList.toggle('dark');
-			localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+			localStorage.setItem(
+				'theme',
+				document.documentElement.classList.contains('dark') ? 'dark' : 'light',
+			);
 		});
 	});
 </script>
