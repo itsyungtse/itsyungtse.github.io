@@ -27,42 +27,52 @@ const socials = [
 <Layout title={SITE_TITLE} description={SITE_DESCRIPTION}>
 	<Header />
 	<main class="grow md:container md:mx-auto">
-		<section class="flex flex-col gap-2">
-			<div class="flex items-end gap-2">
-				<h1 class="text-xl font-bold">YungTse Teng</h1>
-			</div>
-			<div class="flex gap-2">
+		<section class="flex flex-col gap-3">
+			<h1 class="text-[2rem] leading-tight font-bold tracking-tight">
+				YungTse Teng
+			</h1>
+			<p class="text-muted-foreground text-[1.0625rem] leading-relaxed">
+				Software engineer. Notes on frontend development, performance, and
+				modern tooling.
+			</p>
+			<div class="flex gap-4">
 				{
 					socials.map((social) => (
-						<a href={social.url} target="_blank">
-							<span class="text-sm underline"> {social.name} </span>
+						<a
+							href={social.url}
+							target="_blank"
+							class="text-accent text-sm font-medium underline-offset-4 hover:underline"
+						>
+							<span> {social.name} </span>
 							<span class="sr-only">{social.screenReaderText}</span>
 						</a>
 					))
 				}
 			</div>
 		</section>
-		<section class="container my-8">
-			<ul class="m-0 flex list-none flex-col gap-8 p-0 md:gap-8">
+		<section class="my-12">
+			<h2
+				class="text-muted-foreground mb-2 text-xs font-semibold tracking-wider uppercase"
+			>
+				Writing
+			</h2>
+			<ul class="m-0 flex list-none flex-col p-0">
 				{
 					posts.map((post) => (
-						<li class="group w-full">
-							<a
-								href={`/blog/${post.id}/`}
-								class="flex flex-col items-center gap-2"
-							>
-								<div class="flex w-full flex-col justify-between gap-2 md:flex-row md:items-center md:gap-0">
-									<h4
-										class="m-0 text-lg leading-tight transition-colors duration-200 group-hover:underline"
+						<li class="group border-border w-full border-t first:border-t-0">
+							<a href={`/blog/${post.id}/`} class="flex flex-col gap-1.5 py-5">
+								<div class="flex w-full flex-col justify-between gap-1 md:flex-row md:items-baseline md:gap-6">
+									<h3
+										class="m-0 text-[1.0625rem] leading-snug font-semibold decoration-1 underline-offset-4 group-hover:underline"
 										transition:name={`post-title-${post.id}`}
 									>
 										{post.data.title}
-									</h4>
-									<p class="m-0 text-xs text-(--gray) transition-colors duration-200 group-hover:text-(--accent)">
+									</h3>
+									<p class="text-muted-foreground m-0 shrink-0 text-sm">
 										<FormattedDate date={post.data.pubDate} />
 									</p>
 								</div>
-								<p class="invisible w-full text-xs text-(--gray) transition-colors duration-200 group-hover:text-(--accent) md:visible">
+								<p class="text-muted-foreground m-0 text-sm leading-relaxed">
 									{post.data.description}
 								</p>
 							</a>

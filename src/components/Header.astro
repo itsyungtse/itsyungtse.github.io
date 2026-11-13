@@ -5,10 +5,13 @@ const pathname = Astro.url.pathname;
 ---
 
 <header class="flex h-20 shrink-0 items-center">
-	<nav class="mx-auto w-full max-w-3xl px-4">
+	<nav class="mx-auto w-full max-w-[712px] px-4">
 		{
 			pathname !== '/' && (
-				<a href="/" class="text-sm hover:underline">
+				<a
+					href="/"
+					class="text-muted-foreground hover:text-foreground text-sm transition-colors"
+				>
 					Back to Home
 				</a>
 			)

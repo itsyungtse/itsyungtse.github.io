@@ -1,0 +1,217 @@
+---
+title: 'A Few Fast Drags Crashed Our Board: Debugging a React Update Loop'
+description: 'Dragging cards quickly across a kanban board took the whole page down. It was not a performance problem: the drag preview kept moving a card back and forth between two columns until React stopped it.'
+pubDate: 'Nov 13 2026'
+---
+
+**TL;DR** The page did not crash because React was overloaded. The drag preview moved a card into another column, the layout shifted, the drag library re-measured and picked the column the card had just left, and the cycle repeated on its own until React aborted it. The fix is a few lines: let the preview change columns at most once per animation frame.
+
+## The symptom
+
+Our project management tool has a Trello-style board: one column per status, and cards you drag between columns. A tester reported that after dragging cards around for a while, the whole page turned into our error screen and only a reload brought it back.
+
+Slow drags were fine. Only fast, repeated drags broke it. The console had this:
+
+```
+Error: Maximum update depth exceeded. This can happen when a component
+repeatedly calls setState inside componentWillUpdate or componentDidUpdate.
+React limits the number of nested updates to prevent infinite loops.
+The above error occurred in the <DndContext> component.
+```
+
+`DndContext` comes from [dnd-kit](https://dndkit.com/), the drag-and-drop library we use. That is where the error surfaced, not where it came from.
+
+## Background: how the drag preview works
+
+While a card is dragged over another column, we move it into that column right away, so the user sees where it will land. The real write to the server happens only on drop. This is the usual multi-container pattern with dnd-kit.
+
+The preview hangs off `onDragOver`, which fires whenever the target closest to the dragged card changes. A simplified version:
+
+```tsx
+const [dragBoard, setDragBoard] = useState<Board | null>(null);
+const liveBoard = dragBoard ?? board;
+
+function handleDragOver(e: DragOverEvent) {
+	const source = columnOf(liveBoard, e.active.id);
+	const target = columnOf(liveBoard, e.over?.id);
+	if (!target || target === source) return;
+
+	setDragBoard(moveCard(liveBoard, e.active.id, source, target, e.over?.id));
+}
+```
+
+"Closest target" is decided by collision detection. We use dnd-kit's `closestCorners`: it measures from the four corners of the dragged card to the corners of every column and every card, and the nearest one becomes `over`.
+
+Here is the catch: the preview changes the layout. Putting the card into a new column pushes that column's cards down, and the column it left closes the gap. When the layout changes, dnd-kit measures again, even if the mouse has not moved.
+
+## The evidence: one card, 29 moves in 257 ms
+
+First I reproduced it locally. A script simulated the mouse, dragging cards quickly between columns in 12 steps, 4 to 10 ms apart. The first run crashed on drag 26. The round it failed on varied, but each of the three runs I did crashed within 100 drags.
+
+One trap along the way: dnd-kit's `MouseSensor` listens for `mousedown`, `mousemove` and `mouseup`. My first script dispatched `PointerEvent`s, the drags never started, and "no crash" nearly passed as good news. Every run since also checks that the cards really moved.
+
+Then I logged every column change inside `handleDragOver`: source, target and `over`. That run crashed on drag 80, and the drag that crashed looked like this (card ids replaced with A and B):
+
+```
+  0ms  Done        -> Testing
+ 19ms  Testing     -> In Review
+ 41ms  In Review   -> In Progress   over=card A
+ 48ms  In Progress -> In Review     over=card B
+ 54ms  In Review   -> In Progress   over=card A
+ 62ms  In Progress -> In Review     over=card B
+ ...
+221ms  In Progress -> In Review     over=card B
+257ms  In Review   -> In Progress   over=card A   (crash)
+```
+
+The same card swapped between In Progress and In Review roughly every 6 ms, 29 times in 257 ms, while `over` alternated between the same two cards. For comparison, the normal drags before it changed column 2.4 times on average.
+
+## The mechanism: a loop that turns by itself
+
+Put the log next to the code and you get this loop. When the cursor sits near the border between two columns, with one card on each side at about the same distance, every move of the preview shifts the layout just enough to make the card on the other side the closest.
+
+<figure class="diagram">
+	<svg
+		viewBox="0 0 760 340"
+		role="img"
+		aria-label="With the mouse still, the loop keeps turning by itself"
+	>
+		<defs>
+			<marker
+				id="loop-arrow"
+				viewBox="0 0 10 10"
+				refX="9"
+				refY="5"
+				markerWidth="6"
+				markerHeight="6"
+				orient="auto-start-reverse"
+			>
+				<path d="M0 0L10 5L0 10z" class="diagram-arrowhead" />
+			</marker>
+			<marker
+				id="loop-fix-arrow"
+				viewBox="0 0 10 10"
+				refX="9"
+				refY="5"
+				markerWidth="6"
+				markerHeight="6"
+				orient="auto-start-reverse"
+			>
+				<path d="M0 0L10 5L0 10z" class="diagram-accent-fill" />
+			</marker>
+		</defs>
+		<text x="24" y="34" class="diagram-title">
+			With the mouse still, the loop keeps turning by itself
+		</text>
+		<g class="diagram-line">
+			<path d="M340 110H420" marker-end="url(#loop-arrow)" />
+			<path d="M570 142V218" marker-end="url(#loop-arrow)" />
+			<path d="M420 250H340" marker-end="url(#loop-arrow)" />
+		</g>
+		<path
+			d="M190 218V142"
+			class="diagram-accent-line"
+			marker-end="url(#loop-fix-arrow)"
+		/>
+		<text x="204" y="184" class="diagram-note-strong">
+			The fix: skip if this frame already moved a card
+		</text>
+		<rect x="40" y="78" width="300" height="64" rx="8" class="diagram-box" />
+		<text x="56" y="104" class="diagram-name">
+			1. Preview moves the card
+		</text>
+		<text x="56" y="126" class="diagram-body">
+			onDragOver calls setDragBoard
+		</text>
+		<rect x="420" y="78" width="300" height="64" rx="8" class="diagram-box" />
+		<text x="436" y="104" class="diagram-name">
+			2. React re-renders, layout shifts
+		</text>
+		<text x="436" y="126" class="diagram-body">
+			Cards in both columns shift
+		</text>
+		<rect x="420" y="218" width="300" height="64" rx="8" class="diagram-box" />
+		<text x="436" y="244" class="diagram-name">
+			3. dnd-kit measures again
+		</text>
+		<text x="436" y="266" class="diagram-body">
+			Runs even though the mouse is still
+		</text>
+		<rect x="40" y="218" width="300" height="64" rx="8" class="diagram-box" />
+		<text x="56" y="244" class="diagram-name">
+			4. The other column is now closest
+		</text>
+		<text x="56" y="266" class="diagram-body">
+			So onDragOver moves the card back
+		</text>
+		<text x="24" y="318" class="diagram-body">
+			About 6 ms per turn. Turn after turn, React counts nested updates until it
+			gives up.
+		</text>
+	</svg>
+	<figcaption>
+		The drag preview loop. The fix sits on the step from 4 back to 1.
+	</figcaption>
+</figure>
+
+No step in this loop is a user action. Slow drags rarely stop on that exact spot; fast, repeated drags land near a column border far more often, which is why only "dragging a lot, quickly" crashed the page.
+
+## This is not a performance problem
+
+"Too many updates, React can't keep up" is the natural first guess, and it is wrong. Too many updates make a page sluggish; they do not throw. Drag a thousand times and React will work through every update, as long as each one comes from the mouse.
+
+This error is React stopping on purpose. It counts updates that are scheduled while the previous one is still being committed, and past a fixed limit it decides the chain will never end. Left alone, the tab would freeze, so React throws `Maximum update depth exceeded` and lets the error boundary take over.
+
+So the problem is not how many updates there are, but that each update triggers the next. The chain is what needs fixing, not the speed.
+
+## The fix: one column change per frame
+
+The fix is a few lines. After the preview moves a card to a new column, it ignores further column changes until the browser paints the next frame:
+
+```tsx
+const previewMovedThisFrame = useRef(false);
+
+function handleDragOver(e: DragOverEvent) {
+	// ... work out source and target
+	if (!target || target === source) return;
+	if (previewMovedThisFrame.current) return;
+
+	previewMovedThisFrame.current = true;
+	requestAnimationFrame(() => {
+		previewMovedThisFrame.current = false;
+	});
+	setDragBoard(moveCard(liveBoard, e.active.id, source, target, e.over?.id));
+}
+```
+
+`requestAnimationFrame` runs its callback right before the browser paints the next frame, about 16 ms later at 60 Hz. Before that, this round's re-render, layout and collision detection all finish. The loop above turns every 6 ms or so, entirely inside the window where the flag is still set, so the second move is skipped. By the next frame the layout has settled, and the next decision is made on a stable layout.
+
+Two details:
+
+- The flag lives in `useRef`, not `useState`. Writing a ref does not re-render; writing state would add one more update to the very chain we are trying to break.
+- Only column changes are gated, not reordering within a column. At worst the card changes column once per frame, but React is never flooded in one go.
+
+## Verification
+
+The same mouse-simulation script ran in four setups. Every run also checked that the moves reached the server, so a drag that never started could not pass as a fix.
+
+| Setup                                 | Drags | Result              |
+| ------------------------------------- | ----- | ------------------- |
+| Before the fix                        | 26    | Page crashed        |
+| After the fix, first drag pattern     | 120   | No crash, no errors |
+| After the fix, faster and more random | 200   | No crash, no errors |
+| Fix removed again                     | 26    | Page crashed        |
+
+The last row matters most. The bug comes back when the guard is removed and goes away when it is restored, which is what shows these lines are the fix and not luck. I also dragged a single card to the last column to check that a normal drop still lands where it is released.
+
+There is no unit test for this one. It only happens when the browser actually lays out the page, and jsdom does no layout.
+
+## When you see "Maximum update depth exceeded"
+
+The error does not mean "too slow". It means "an update is triggering itself". Next time, I would start with three steps:
+
+1. Find the `setState` that keeps firing. Log a timestamp and the key values right before it; a two-value flip-flop usually shows up at a glance.
+2. Ask what makes it run again. Here the answer was not in our code at all, but in the drag library re-measuring after a layout change.
+3. Decide where to break the chain: "don't set it if the value didn't change", or, as here, "wait one frame before deciding again".
+
+And verify it backwards: remove the fix and make sure the bug comes back.

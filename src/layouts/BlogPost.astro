@@ -48,20 +48,26 @@ const jsonLd = {
 	<Header />
 	<main class="md:container md:mx-auto">
 		<article class="prose w-full max-w-none">
-			<div class="text-center">
-				<h1 class="text-3xl" transition:name={`post-title-${id}`}>{title}</h1>
-				<div class="date">
+			<header class="not-prose mb-10">
+				<h1
+					class="text-[2rem] leading-tight font-bold tracking-tight md:text-[2.375rem]"
+					transition:name={`post-title-${id}`}
+				>
+					{title}
+				</h1>
+				<p class="text-muted-foreground mt-4 text-sm">
 					<FormattedDate date={pubDate} />
+					<span aria-hidden="true"> · </span>
+					<span>YungTse Teng</span>
 					{
 						updatedDate && (
-							<div class="last-updated-on">
+							<span class="block">
 								Last updated on <FormattedDate date={updatedDate} />
-							</div>
+							</span>
 						)
 					}
-				</div>
-				<hr />
-			</div>
+				</p>
+			</header>
 			<slot />
 		</article>
 	</main>
