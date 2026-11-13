@@ -91,7 +91,7 @@ body {
 }
 
 main {
-	@apply mx-auto px-4;
+	@apply mx-auto px-0 sm:px-4;
 	max-width: 712px;
 	width: 100%;
 	box-sizing: border-box;
@@ -177,6 +177,20 @@ main {
 .diagram svg {
 	width: 100%;
 	height: auto;
+}
+
+.diagram-narrow {
+	display: none;
+}
+
+@media (max-width: 639px) {
+	.diagram-narrow {
+		display: block;
+	}
+
+	.diagram-wide {
+		display: none;
+	}
 }
 
 .diagram figcaption {

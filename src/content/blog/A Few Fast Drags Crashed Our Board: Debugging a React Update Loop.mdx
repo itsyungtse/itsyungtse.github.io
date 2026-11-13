@@ -4,6 +4,8 @@ description: 'Dragging cards quickly across a kanban board took the whole page d
 pubDate: 'Nov 13 2026'
 ---
 
+import DragLoopDiagram from '@/components/DragLoopDiagram.astro';
+
 **TL;DR** The page did not crash because React was overloaded. The drag preview moved a card into another column, the layout shifted, the drag library re-measured and picked the column the card had just left, and the cycle repeated on its own until React aborted it. The fix is a few lines: let the preview change columns at most once per animation frame.
 
 ## The symptom
@@ -70,89 +72,7 @@ The same card swapped between In Progress and In Review roughly every 6 ms, 29 t
 
 Put the log next to the code and you get this loop. When the cursor sits near the border between two columns, with one card on each side at about the same distance, every move of the preview shifts the layout just enough to make the card on the other side the closest.
 
-<figure class="diagram">
-	<svg
-		viewBox="0 0 760 340"
-		role="img"
-		aria-label="With the mouse still, the loop keeps turning by itself"
-	>
-		<defs>
-			<marker
-				id="loop-arrow"
-				viewBox="0 0 10 10"
-				refX="9"
-				refY="5"
-				markerWidth="6"
-				markerHeight="6"
-				orient="auto-start-reverse"
-			>
-				<path d="M0 0L10 5L0 10z" class="diagram-arrowhead" />
-			</marker>
-			<marker
-				id="loop-fix-arrow"
-				viewBox="0 0 10 10"
-				refX="9"
-				refY="5"
-				markerWidth="6"
-				markerHeight="6"
-				orient="auto-start-reverse"
-			>
-				<path d="M0 0L10 5L0 10z" class="diagram-accent-fill" />
-			</marker>
-		</defs>
-		<text x="24" y="34" class="diagram-title">
-			With the mouse still, the loop keeps turning by itself
-		</text>
-		<g class="diagram-line">
-			<path d="M340 110H420" marker-end="url(#loop-arrow)" />
-			<path d="M570 142V218" marker-end="url(#loop-arrow)" />
-			<path d="M420 250H340" marker-end="url(#loop-arrow)" />
-		</g>
-		<path
-			d="M190 218V142"
-			class="diagram-accent-line"
-			marker-end="url(#loop-fix-arrow)"
-		/>
-		<text x="204" y="184" class="diagram-note-strong">
-			The fix: skip if this frame already moved a card
-		</text>
-		<rect x="40" y="78" width="300" height="64" rx="8" class="diagram-box" />
-		<text x="56" y="104" class="diagram-name">
-			1. Preview moves the card
-		</text>
-		<text x="56" y="126" class="diagram-body">
-			onDragOver calls setDragBoard
-		</text>
-		<rect x="420" y="78" width="300" height="64" rx="8" class="diagram-box" />
-		<text x="436" y="104" class="diagram-name">
-			2. React re-renders, layout shifts
-		</text>
-		<text x="436" y="126" class="diagram-body">
-			Cards in both columns shift
-		</text>
-		<rect x="420" y="218" width="300" height="64" rx="8" class="diagram-box" />
-		<text x="436" y="244" class="diagram-name">
-			3. dnd-kit measures again
-		</text>
-		<text x="436" y="266" class="diagram-body">
-			Runs even though the mouse is still
-		</text>
-		<rect x="40" y="218" width="300" height="64" rx="8" class="diagram-box" />
-		<text x="56" y="244" class="diagram-name">
-			4. The other column is now closest
-		</text>
-		<text x="56" y="266" class="diagram-body">
-			So onDragOver moves the card back
-		</text>
-		<text x="24" y="318" class="diagram-body">
-			About 6 ms per turn. Turn after turn, React counts nested updates until it
-			gives up.
-		</text>
-	</svg>
-	<figcaption>
-		The drag preview loop. The fix sits on the step from 4 back to 1.
-	</figcaption>
-</figure>
+<DragLoopDiagram />
 
 No step in this loop is a user action. Slow drags rarely stop on that exact spot; fast, repeated drags land near a column border far more often, which is why only "dragging a lot, quickly" crashed the page.
 

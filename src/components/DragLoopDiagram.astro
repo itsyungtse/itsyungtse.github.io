@@ -1,0 +1,172 @@
+---
+
+---
+
+<figure class="diagram">
+	<svg
+		class="diagram-narrow"
+		viewBox="-2 0 356 524"
+		role="img"
+		aria-label="With the mouse still, the loop keeps turning by itself"
+	>
+		<defs>
+			<marker
+				id="loop-narrow-arrow"
+				viewBox="0 0 10 10"
+				refX="9"
+				refY="5"
+				markerWidth="6"
+				markerHeight="6"
+				orient="auto-start-reverse"
+			>
+				<path d="M0 0L10 5L0 10z" class="diagram-arrowhead"></path>
+			</marker>
+			<marker
+				id="loop-narrow-fix-arrow"
+				viewBox="0 0 10 10"
+				refX="9"
+				refY="5"
+				markerWidth="6"
+				markerHeight="6"
+				orient="auto-start-reverse"
+			>
+				<path d="M0 0L10 5L0 10z" class="diagram-accent-fill"></path>
+			</marker>
+		</defs>
+		<text x="0" y="22" class="diagram-title">With the mouse still,</text>
+		<text x="0" y="42" class="diagram-title"
+			>the loop keeps turning by itself</text
+		>
+		<g class="diagram-line">
+			<path d="M150 128V152" marker-end="url(#loop-narrow-arrow)"></path>
+			<path d="M150 216V240" marker-end="url(#loop-narrow-arrow)"></path>
+			<path d="M150 304V328" marker-end="url(#loop-narrow-arrow)"></path>
+		</g>
+		<path
+			d="M300 360H332V96H300"
+			class="diagram-accent-line"
+			marker-end="url(#loop-narrow-fix-arrow)"></path>
+		<rect x="0" y="64" width="300" height="64" rx="8" class="diagram-box"
+		></rect>
+		<text x="16" y="90" class="diagram-name">1. Preview moves the card</text>
+		<text x="16" y="112" class="diagram-body"
+			>onDragOver calls setDragBoard</text
+		>
+		<rect x="0" y="152" width="300" height="64" rx="8" class="diagram-box"
+		></rect>
+		<text x="16" y="178" class="diagram-name"
+			>2. React re-renders, layout shifts</text
+		>
+		<text x="16" y="200" class="diagram-body">Cards in both columns shift</text>
+		<rect x="0" y="240" width="300" height="64" rx="8" class="diagram-box"
+		></rect>
+		<text x="16" y="266" class="diagram-name">3. dnd-kit measures again</text>
+		<text x="16" y="288" class="diagram-body"
+			>Runs even though the mouse is still</text
+		>
+		<rect x="0" y="328" width="300" height="64" rx="8" class="diagram-box"
+		></rect>
+		<text x="16" y="354" class="diagram-name"
+			>4. The other column is now closest</text
+		>
+		<text x="16" y="376" class="diagram-body"
+			>So onDragOver moves the card back</text
+		>
+		<text x="0" y="424" class="diagram-note-strong"
+			>The blue line back to 1 is the fix:</text
+		>
+		<text x="0" y="442" class="diagram-note-strong"
+			>skip if this frame already moved a card.</text
+		>
+		<text x="0" y="478" class="diagram-body"
+			>About 6 ms per turn. Turn after turn,</text
+		>
+		<text x="0" y="496" class="diagram-body"
+			>React counts nested updates until it</text
+		>
+		<text x="0" y="514" class="diagram-body">gives up.</text>
+	</svg>
+	<svg
+		class="diagram-wide"
+		viewBox="0 0 760 340"
+		role="img"
+		aria-label="With the mouse still, the loop keeps turning by itself"
+	>
+		<defs>
+			<marker
+				id="loop-arrow"
+				viewBox="0 0 10 10"
+				refX="9"
+				refY="5"
+				markerWidth="6"
+				markerHeight="6"
+				orient="auto-start-reverse"
+			>
+				<path d="M0 0L10 5L0 10z" class="diagram-arrowhead"></path>
+			</marker>
+			<marker
+				id="loop-fix-arrow"
+				viewBox="0 0 10 10"
+				refX="9"
+				refY="5"
+				markerWidth="6"
+				markerHeight="6"
+				orient="auto-start-reverse"
+			>
+				<path d="M0 0L10 5L0 10z" class="diagram-accent-fill"></path>
+			</marker>
+		</defs>
+		<text x="24" y="34" class="diagram-title">
+			With the mouse still, the loop keeps turning by itself
+		</text>
+		<g class="diagram-line">
+			<path d="M340 110H420" marker-end="url(#loop-arrow)"></path>
+			<path d="M570 142V218" marker-end="url(#loop-arrow)"></path>
+			<path d="M420 250H340" marker-end="url(#loop-arrow)"></path>
+		</g>
+		<path
+			d="M190 218V142"
+			class="diagram-accent-line"
+			marker-end="url(#loop-fix-arrow)"></path>
+		<text x="204" y="184" class="diagram-note-strong">
+			The fix: skip if this frame already moved a card
+		</text>
+		<rect x="40" y="78" width="300" height="64" rx="8" class="diagram-box"
+		></rect>
+		<text x="56" y="104" class="diagram-name"> 1. Preview moves the card </text>
+		<text x="56" y="126" class="diagram-body">
+			onDragOver calls setDragBoard
+		</text>
+		<rect x="420" y="78" width="300" height="64" rx="8" class="diagram-box"
+		></rect>
+		<text x="436" y="104" class="diagram-name">
+			2. React re-renders, layout shifts
+		</text>
+		<text x="436" y="126" class="diagram-body">
+			Cards in both columns shift
+		</text>
+		<rect x="420" y="218" width="300" height="64" rx="8" class="diagram-box"
+		></rect>
+		<text x="436" y="244" class="diagram-name">
+			3. dnd-kit measures again
+		</text>
+		<text x="436" y="266" class="diagram-body">
+			Runs even though the mouse is still
+		</text>
+		<rect x="40" y="218" width="300" height="64" rx="8" class="diagram-box"
+		></rect>
+		<text x="56" y="244" class="diagram-name">
+			4. The other column is now closest
+		</text>
+		<text x="56" y="266" class="diagram-body">
+			So onDragOver moves the card back
+		</text>
+		<text x="24" y="318" class="diagram-body">
+			About 6 ms per turn. Turn after turn, React counts nested updates until it
+			gives up.
+		</text>
+	</svg>
+	<figcaption>
+		The drag preview loop. The fix sits on the step from 4 back to 1.
+	</figcaption>
+</figure>
